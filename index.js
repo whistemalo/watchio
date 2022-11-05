@@ -1,6 +1,7 @@
 const express = require("express");
 const routerAPI = require("./routes/index.routes");
 const cors = require("cors");
+
 const { config } = require('./config/config');
 
 const URI = `mongodb://admin:admin123@localhost:27017/watchio?authSource=admin`;
@@ -28,6 +29,11 @@ mongoose
 .connect(URI)
 .then(() => {console.log("Connected to Mongo");})
 .catch((err) => {console.log(err);});
+
+app.get('/', function (req, res) {
+  res.sendFile(__dirname + '/index.html');
+});
+
 
 
 
