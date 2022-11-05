@@ -1,33 +1,43 @@
 const express = require("express");
+const routerAPI = require("./routes/index.routes");
+const cors = require("cors");
+const { config } = require('./config/config');
+
+const URI = `mongodb://admin:admin123@localhost:27017/watchio?authSource=admin`;
+console.log(URI);
+const mongoose = require("mongoose");
+
+const {
+  logErrors,
+  errorHandler,
+  boomErrorHandler,
+} = require('./middlewares/error.handler');
+
 const app = express();
-const fs = require("fs");
+const port = 3000;
 
-app.get("/", function (req, res) {
-    res.sendFile(__dirname + "/index.html");
-});
+app.use(express.json());
+app.use(cors());
 
-app.get("/video", function (req, res) {
-    const range = req.headers.range;
-    if (!range) {
-        res.status(400).send("Requires Range header");
-    }
-    const videoPath = "DPS_ENTREGA2.mp4";
-    const videoSize = fs.statSync("DPS_ENTREGA2.mp4").size;
-    const CHUNK_SIZE = 10 ** 6;
-    const start = Number(range.replace(/\D/g, ""));
-    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
-    const contentLength = end - start + 1;
-    const headers = {
-        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": contentLength,
-        "Content-Type": "video/mp4",
-    };
-    res.writeHead(206, headers);
-    const videoStream = fs.createReadStream(videoPath, { start, end });
-    videoStream.pipe(res);
-});
+routerAPI(app);
+app.use(logErrors);
+app.use(boomErrorHandler);
+app.use(errorHandler);
 
-app.listen(8000, function () {
-    console.log("Listening on port 8000!");
-});
+mongoose
+.connect(URI)
+.then(() => {console.log("Connected to Mongo");})
+.catch((err) => {console.log(err);});
+
+
+
+ app.listen(port, () => {
+   console.log(`Listening on port ${port}!`);
+ });
+
+
+// app.listen(port, () => {
+//     console.log(`Example app listening at http://localhost:${port}`);
+// });
+
+
