@@ -5,7 +5,7 @@ class VideoService {
     constructor() {}
 
     async getVideo(show_id, range) {
-      const videoPath = 'DPS_ENTREGA2.mp4';
+      const videoPath = `./video/${show_id}.mp4`;
       if (!fs.existsSync(videoPath)) {
         throw boom.notFound('Video not found');
       }
